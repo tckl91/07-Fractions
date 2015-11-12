@@ -2,44 +2,61 @@
 // Author: Kai Cheng
 //----------------------------------------------------------------------
 
+package fractions;
+
 public class Fraction {
 	private int numerator;
 	private int denominator;
 
-	private static int gcd(int num1, int num2) {
-		if (num2 == 0) {
-			return num1;
-		}
-		return gcd(num2, num1 % num2);
-	}
-
-	public Fraction(int numumerator, int denominator) {
+	Fraction(int numumerator, int denominator) {
 		if (denominator == 0) {
 			throw new ArithmeticException("Denominator Cannot Be 0.");
 		}
+		if (denominator < 0){
+			numerator *= -1;
+			denominator *= -1;
+		}
+		
 		this.numerator = numumerator;
 		this.denominator = denominator;
 		normalize();
 	}
 
-	public Fraction(int num) {
-		this(num, 1);
+	Fraction(int num) {
+		this.numerator = num;
+		this.denominator = 1;
 	}
 
-	public Fraction() {
-		this(0, 1);
+	Fraction(String str) {
+		String[] nums = str.split("/");
+		if (nums.length == 1){
+			this.numerator = Integer.parseInt(nums[0].trim());
+			this.denominator = 1;
+		}
+		else {
+			this.numerator = Integer.parseInt(nums[0].trim());
+			this.denominator = Integer.parseInt(nums[1].trim());
+			if (this.denominator == 0) {
+				throw new ArithmeticException("Denominator cannot be zero!");
+			}
+			if (this.denominator < 0) {
+				this.numerator *= -1;
+				this.denominator *= -1;
+			}
+			normalize();
+		}	
 	}
 
 	public Fraction add(Fraction f) {
-		return new Fraction((numerator * f.denominator) + (f.numerator * denominator), denominator * f.numerator);
+		return new Fraction((numerator * f.denominator + f.numerator * denominator), denominator * f.denominator);
 	}
 
-	public Fraction sub(Fraction f) {
-		return new Fraction((numerator * f.denominator) - (f.numerator * denominator), denominator * f.numerator);
+	public Fraction subtract(Fraction f) {
+		return new Fraction((numerator * f.denominator) - (f.numerator * denominator), denominator * f.denominator);
 	}
 
 	public Fraction multiply(Fraction f) {
-		return new Fraction(numerator * f.numerator, denominator * f.numerator);
+		return new Fraction(numerator * f.numerator, denominator * f.denominator);
 	}
 
 	public Fraction divide(Fraction f) {
@@ -47,29 +64,30 @@ public class Fraction {
 	}
 
 	private void normalize() {
-		assert denominator != 0 : "Can't Divide By 0.";
-		if (denominator < 0) {
-			numerator *= -1;
-			denominator *= -1;
+		int defaultNum = numerator;
+		int defaultDenom = denominator;
+		int temp;
+		
+		while (denominator != 0) {
+			temp = denominator;
+			denominator = numerator % denominator;
+			numerator = temp;
 		}
-		else if (numerator == 0) {
-			denominator = 1;
-		}
-		else {
-			int gcdnum = gcd(numerator, denominator);
-			numerator /= gcdnum;
-			denominator /= gcdnum;
-		}
+		int common = numerator;
+		numerator = defaultNum / Math.abs(common);
+		denominator = defaultDenom / Math.abs(common);
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Fraction)) {
 			return false;
 		}
 		Fraction f = (Fraction) o;
-		return (numerator == f.numerator) && (denominator == f.denominator);
+		return ((numerator == f.numerator) && (denominator == f.denominator));
 	}
 
+	@Override
 	public int hashCode() {
 		return numerator * denominator;
 	}
@@ -98,10 +116,10 @@ public class Fraction {
 	}
 
 	public int compareTo(Fraction f) {
-		if (numerator * f.denominator == f.numerator * denominator) {
+		if (numerator / denominator == f.numerator / f.denominator) {
 			return 0;
 		}
-		else if (numerator * f.denominator < f.numerator * denominator) {
+		else if (numerator / denominator < f.numerator / f.denominator) {
 			return -1;
 		}
 		else {
@@ -109,12 +127,17 @@ public class Fraction {
 		}
 	}
 
+	@Override
 	public String toString() {
-		if (numerator == 1) {
-			return "" + numerator;
+		if (denominator == 1) {
+			return Integer.toString(numerator);
 		}
 		else {
-			return "" + numerator + "/" + denominator;
+			return Integer.toString(this.numerator) + "/" + Integer.toString(this.denominator);
 		}
+	}
+	
+	public static void main(String[] args) {
+		
 	}
 }
